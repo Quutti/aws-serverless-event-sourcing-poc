@@ -1,0 +1,33 @@
+{
+  "name": "aws-serverless-event-sourcing-poc",
+  "version": "0.1.0",
+  "bin": {
+    "aws-serverless-event-sourcing-poc": "bin/aws-serverless-event-sourcing-poc.js"
+  },
+  "scripts": {
+    "cdk": "cdk",
+    "internal:cdk:deploy": "./node_modules/.bin/cdk deploy",
+    "internal:services:build": "cd ../services && npm run build",
+    "deploy": "npm run internal:services:build && npm run internal:cdk:deploy"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "1.94.1",
+    "@types/node": "10.17.27",
+    "aws-cdk": "1.94.1",
+    "ts-node": "^9.0.0",
+    "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-apigateway": "^1.94.1",
+    "@aws-cdk/aws-dynamodb": "^1.94.1",
+    "@aws-cdk/aws-iam": "^1.94.1",
+    "@aws-cdk/aws-lambda": "^1.94.1",
+    "@aws-cdk/aws-lambda-event-sources": "^1.94.1",
+    "@aws-cdk/aws-sns": "^1.94.1",
+    "@aws-cdk/aws-sns-subscriptions": "^1.94.1",
+    "@aws-cdk/aws-sqs": "^1.94.1",
+    "@aws-cdk/core": "1.94.1",
+    "dotenv": "^8.2.0",
+    "source-map-support": "^0.5.16"
+  }
+}
