@@ -1,5 +1,5 @@
 import { AttributeType, BillingMode, ITable, Table } from "@aws-cdk/aws-dynamodb";
-import { Function, Runtime } from "@aws-cdk/aws-lambda";
+import { Function, Runtime, Tracing } from "@aws-cdk/aws-lambda";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { Construct, Duration } from "@aws-cdk/core";
 import { codeDirectory } from "../code";
@@ -30,7 +30,8 @@ export default class TestProjector extends BaseProjector {
                 PROJECTION_STATE_TABLE_NAME: this.projectionTable.tableName,
                 READ_MODEL_TABLE_NAME: this.readModelTable.tableName
             },
-            timeout: Duration.seconds(30)
+            timeout: Duration.seconds(30),
+            tracing: (this.tracingRequested) ? Tracing.ACTIVE : Tracing.DISABLED
         });
 
         this.projectionTable.grant(func, 'dynamodb:GetItem', 'dynamodb:PutItem');

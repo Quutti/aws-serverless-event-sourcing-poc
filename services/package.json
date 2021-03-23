@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.868.0",
+    "aws-xray-sdk-core": "^3.2.0",
     "uuid": "^8.3.2"
   }
 }

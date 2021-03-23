@@ -8,15 +8,19 @@ import EventStore from "../event-store";
 export type BaseProjectorProps = {
     eventStore: EventStore;
     streamIds: string[];
+    tracingEnabled?: boolean;
 }
 
 export default abstract class BaseProjector extends Construct {
 
     protected projectionTable: Table;
     protected projectionQueue: Queue;
+    protected tracingRequested: boolean;
 
     constructor(scope: Construct, id: string, props: BaseProjectorProps) {
         super(scope, id);
+
+        this.tracingRequested = !!props.tracingEnabled;
 
         this.projectionTable = new Table(this, 'ProjectionTable', {
             partitionKey: {

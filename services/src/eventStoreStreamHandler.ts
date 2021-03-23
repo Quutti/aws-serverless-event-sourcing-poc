@@ -1,6 +1,9 @@
-import * as AWS from 'aws-sdk';
+import * as AWSRaw from 'aws-sdk';
+import * as XRay from 'aws-xray-sdk-core';
 
 import { DynamoDBStreamHandler } from "aws-lambda";
+
+const AWS = XRay.captureAWS(AWSRaw);
 
 const sns = new AWS.SNS();
 

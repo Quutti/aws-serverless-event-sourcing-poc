@@ -1,6 +1,6 @@
 import { AttributeType, BillingMode, StreamViewType, Table } from "@aws-cdk/aws-dynamodb";
 import { IGrantable } from "@aws-cdk/aws-iam";
-import { Code, Function, IFunction, Runtime, StartingPosition } from "@aws-cdk/aws-lambda";
+import { Code, Function, IFunction, Runtime, StartingPosition, Tracing } from "@aws-cdk/aws-lambda";
 import { SubscriptionFilter, Topic } from "@aws-cdk/aws-sns";
 import { Construct, Duration, Stack } from "@aws-cdk/core";
 import { join } from "path";
@@ -9,13 +9,17 @@ import { SqsSubscription } from "@aws-cdk/aws-sns-subscriptions";
 import { IQueue, Queue } from "@aws-cdk/aws-sqs";
 import { codeDirectory } from "./code";
 
+export type EventStoreProps = {
+    tracingEnabled?: boolean;
+}
+
 export default class EventStore extends Construct {
 
     private frontendQueue: Queue;
     private eventStoreTable: Table;
     private eventStoreTopic: Topic;
 
-    constructor(scope: Construct, id: string) {
+    constructor(scope: Construct, id: string, props?: EventStoreProps) {
 
         super(scope, id);
 
@@ -56,6 +60,8 @@ export default class EventStore extends Construct {
 
         this.eventStoreTopic = new Topic(this, 'EventStoreTopic');
 
+        const tracing = (props?.tracingEnabled) ? Tracing.ACTIVE : Tracing.DISABLED;
+
         const queueProcessingFunction = new Function(this, 'QueueHandler', {
             code: codeDirectory,
             handler: 'eventStoreFrontendQueueHandler.handler',
@@ -63,7 +69,8 @@ export default class EventStore extends Construct {
             environment: {
                 EVENT_STORE_TABLE_NAME: this.eventStoreTable.tableName
             },
-            timeout: Duration.seconds(30)
+            timeout: Duration.seconds(30),
+            tracing
         });
         queueProcessingFunction.addEventSource(eventStoreFrontendQueueSource);
         this.eventStoreTable.grant(queueProcessingFunction, 'dynamodb:PutItem', 'dynamodb:Query');
@@ -75,7 +82,8 @@ export default class EventStore extends Construct {
             environment: {
                 TOPIC_ARN: this.eventStoreTopic.topicArn
             },
-            timeout: Duration.seconds(30)
+            timeout: Duration.seconds(30),
+            tracing
         });
         streamHandlingFunction.addEventSource(eventStoreTableEventSource);
 

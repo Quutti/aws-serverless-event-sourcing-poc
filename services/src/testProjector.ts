@@ -1,6 +1,8 @@
-import * as AWS from 'aws-sdk';
-
+import * as AWSRaw from 'aws-sdk';
+import * as XRay from 'aws-xray-sdk-core';
 import { SQSHandler } from "aws-lambda";
+
+const AWS = XRay.captureAWS(AWSRaw);
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 

@@ -1,6 +1,9 @@
-import * as AWS from 'aws-sdk';
+import * as AWSRaw from 'aws-sdk';
+import * as XRay from 'aws-xray-sdk-core';
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { v4 as uuid } from 'uuid';
+
+const AWS = XRay.captureAWS(AWSRaw);
 
 const sqs = new AWS.SQS();
 

@@ -1,7 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import { ApiKey, EndpointType, LambdaIntegration, RestApi, UsagePlan } from '@aws-cdk/aws-apigateway';
 import { AttributeType, BillingMode, StreamViewType, Table } from '@aws-cdk/aws-dynamodb';
-import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
+import { Code, Function, Runtime, Tracing } from '@aws-cdk/aws-lambda';
 import { join } from 'path';
 import EventStore from './event-store';
 import { codeDirectory } from './code';
@@ -9,6 +9,7 @@ import TestProjector from './projectors/test-projector';
 
 export type AwsServerlessEventSourcingPocStackProps = cdk.StackProps & {
     apiKey?: string;
+    tracing?: boolean;
 }
 
 export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
@@ -18,14 +19,18 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
 
         const apiKeyValue = props?.apiKey;
         const usesApiKey: boolean = !!apiKeyValue;
+        const tracingEnabled: boolean = !!props?.tracing;
 
-        const eventStore = new EventStore(this, 'EventStore');
+        const eventStore = new EventStore(this, 'EventStore', {
+            tracingEnabled
+        });
 
         const addEventFunction = new Function(this, 'AddEvent', {
             code: codeDirectory,
             handler: 'addEvent.handler',
             runtime: Runtime.NODEJS_14_X,
-            memorySize: 512
+            memorySize: 512,
+            tracing: (props?.tracing) ? Tracing.ACTIVE : Tracing.DISABLED
         });
 
         eventStore.prepareFunctionForEventStoreQueue(addEventFunction);
@@ -33,6 +38,9 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
         const api = new RestApi(this, 'ApiGateway', {
             endpointConfiguration: {
                 types: [EndpointType.REGIONAL]
+            },
+            deployOptions: {
+                tracingEnabled
             }
         });
 
@@ -58,7 +66,8 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
 
         const testProjector = new TestProjector(this, 'TestProjector', {
             eventStore,
-            streamIds: ['eb724435-02cb-4c68-9d7a-4b6471c5a810']
+            streamIds: ['eb724435-02cb-4c68-9d7a-4b6471c5a810'],
+            tracingEnabled
         });
 
         const listTestItemsFunction = new Function(this, 'ListTestItems', {
@@ -68,7 +77,8 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
             memorySize: 512,
             environment: {
                 READ_MODEL_TABLE_NAME: testProjector.readModelTable.tableName
-            }
+            },
+            tracing: tracingEnabled ? Tracing.ACTIVE : Tracing.DISABLED
         });
 
         testProjector.readModelTable.grant(listTestItemsFunction, 'dynamodb:Scan');

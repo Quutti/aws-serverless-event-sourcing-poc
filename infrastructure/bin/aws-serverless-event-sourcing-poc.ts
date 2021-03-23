@@ -6,12 +6,17 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+const isTruthyString = (str: string = ''): boolean =>
+    typeof str === 'string' && ['true', '1'].includes(str.toLocaleLowerCase());
+
 const apiKey = process.env.API_KEY;
 const stackName = process.env.STACK_NAME;
+const tracingEnabled = isTruthyString(process.env.TRACING);
 
 const app = new cdk.App();
 new AwsServerlessEventSourcingPocStack(app, 'AwsServerlessEventSourcingPocStack', {
     apiKey,
-    stackName
+    stackName,
+    tracing: tracingEnabled
 });
 
