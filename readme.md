@@ -14,25 +14,27 @@ This project is meant for proofing the concept. Use by your own risk. :)
 ## Usage
 
 ### Deployment
-
 1) Run `npm install` on both "subprojects" - infrastructure and services.
 2) Create an .env file into infrastructure "project"
 3) Define env vars listed below
 4) Run `npm run deploy`
 
 ### Environment variables
-Environment variables can be defined into .env file. 
-
-- API_KEY - Required API Key which must be spesified on the request targeting the API Gateway endpoints
-- TRACING - Optional boolean (true/false) for enabling the AWS X-Ray tracing
-- STACK_NAME - Optional name override for the stack
-
+Protip: Environment variables can be defined into .env file. 
+```
+API_KEY - Required API Key which must be spesified on the request targeting the API Gateway endpoints
+TRACING - Optional boolean (true/false) for enabling the AWS X-Ray tracing
+STACK_NAME - Optional name override for the stack
+```
 ### Tracing and Debugging
 - Application is instrumented and will save the traces for debugging into AWS X-Ray if TRACING enviroment variable is defined.
 - By default, all every lambda function saves the logs into Amazon Cloudwatch
 
 ### An example test case
-"Testing read model" only shows items sent into stream `eb724435-02cb-4c68-9d7a-4b6471c5a810`, so you should use that as a streamId. AddEvent does not validate the event context! You should use the event structure below. Only processed event types are `ITEM_CREATED`, `ITEM_AMOUNT_CHANGED` and `ITEM_DELETED`. Item id is just an unique string for this poc, you can have n+1 items, but event `ITEM_CREATED` should be called for all of them.
+- "Testing read model" only shows items sent into stream `eb724435-02cb-4c68-9d7a-4b6471c5a810`, so you should use that as a streamId.
+- AddEvent does not validate the event context! You should use the event structure below.
+- Only processed event types are `ITEM_CREATED`, `ITEM_AMOUNT_CHANGED` and `ITEM_DELETED`.
+- Item id is just an unique string, you can have n+1 items, but event `ITEM_CREATED` should be called for all of them.
 
 Note IT takes a few seconds change to propagate into read model as event sourcing + CQRS model is eventual consistent.
 
