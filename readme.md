@@ -9,7 +9,7 @@ Built with AWS-CDK and Node.js.
 This project is meant for proofing the concept. Use by your own risk. :)
 
 ## Architecture
-![Architecture image](https://raw.githubusercontent.com/Quutti/aws-serverless-event-sourcing-poc/main/Poc.png)
+![Architecture image](https://raw.githubusercontent.com/Quutti/aws-serverless-event-sourcing-poc/main/graphics/architecture.png)
 
 ## Usage
 
