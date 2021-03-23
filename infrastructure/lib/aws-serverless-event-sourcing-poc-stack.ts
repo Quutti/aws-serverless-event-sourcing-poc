@@ -8,17 +8,16 @@ import { codeDirectory } from './code';
 import TestProjector from './projectors/test-projector';
 
 export type AwsServerlessEventSourcingPocStackProps = cdk.StackProps & {
-    apiKey?: string;
+    apiKey: string;
     tracing?: boolean;
 }
 
 export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
 
-    constructor(scope: cdk.Construct, id: string, props?: AwsServerlessEventSourcingPocStackProps) {
+    constructor(scope: cdk.Construct, id: string, props: AwsServerlessEventSourcingPocStackProps) {
         super(scope, id, props);
 
-        const apiKeyValue = props?.apiKey;
-        const usesApiKey: boolean = !!apiKeyValue;
+        const apiKeyValue = props.apiKey;
         const tracingEnabled: boolean = !!props?.tracing;
 
         const eventStore = new EventStore(this, 'EventStore', {
@@ -44,24 +43,22 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
             }
         });
 
-        if (usesApiKey) {
 
-            const apiKey = new ApiKey(this, 'ApiKey', {
-                value: apiKeyValue
-            });
+        const apiKey = new ApiKey(this, 'ApiKey', {
+            value: apiKeyValue
+        });
 
-            api.addUsagePlan('UsagePlan', {
-                apiKey,
-                apiStages: [{
-                    api,
-                    stage: api.deploymentStage
-                }]
-            });
-        }
+        api.addUsagePlan('UsagePlan', {
+            apiKey,
+            apiStages: [{
+                api,
+                stage: api.deploymentStage
+            }]
+        });
 
         const addEventResource = api.root.addResource('addEvent');
         addEventResource.addMethod('POST', new LambdaIntegration(addEventFunction), {
-            apiKeyRequired: usesApiKey
+            apiKeyRequired: true
         });
 
         const testProjector = new TestProjector(this, 'TestProjector', {
@@ -85,7 +82,7 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
 
         const listTestItemsResource = api.root.addResource('listTestItems');
         listTestItemsResource.addMethod('GET', new LambdaIntegration(listTestItemsFunction), {
-            apiKeyRequired: usesApiKey
+            apiKeyRequired: true
         });
 
     }
