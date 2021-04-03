@@ -58,7 +58,10 @@ export default class EventStore extends Construct {
             startingPosition: StartingPosition.LATEST
         });
 
-        this.eventStoreTopic = new Topic(this, 'EventStoreTopic');
+        this.eventStoreTopic = new Topic(this, 'EventStoreTopic', {
+            topicName: `${Stack.of(this)}EventStoreTopic`,
+            fifo: true
+        });
 
         const tracing = (props?.tracingEnabled) ? Tracing.ACTIVE : Tracing.DISABLED;
 
@@ -100,8 +103,8 @@ export default class EventStore extends Construct {
         return this.eventStoreTable.tableName;
     }
 
-    public grantEventStorePermissions(grantee: IGrantable) {
-        this.eventStoreTable.grant(grantee, 'dynamodb:PutItem', 'dynamodb:Query');
+    public grantEventStoreReadPermissions(grantee: IGrantable) {
+        this.eventStoreTable.grant(grantee, 'dynamodb:Scan', 'dynamodb:Query');
     }
 
     public subscribeQueueToTopic(queue: IQueue, streamIds: string[]) {

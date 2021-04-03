@@ -25,21 +25,25 @@ export const handler: SQSHandler = async (event) => {
     const projectionStateTableName = process.env.PROJECTION_STATE_TABLE_NAME;
 
     for (const record of event.Records) {
-        const snsEventBody = JSON.parse(record.body);
-        const event = JSON.parse(snsEventBody.Message);
+        const eventContext = JSON.parse(record.body);
+        const isStackedEvent = typeof eventContext.Message === 'string';
+
+        const event = (isStackedEvent)
+            ? JSON.parse(eventContext.Message)
+            : eventContext;
 
         const { streamId, eventId, type, data: dataStr } = event;
         const data = JSON.parse(dataStr);
 
         const lastProcessedEventId = await resolveLastProcessedEventId(streamId);
 
-        const wantedEventId = lastProcessedEventId + 1;
+        const expectedEventId = lastProcessedEventId + 1;
 
-        if (wantedEventId < eventId) {
+        if (expectedEventId < eventId) {
             // maybe we are replaying events and this just poppd up, return
             // it into queue for later processing by throwing an error.
             throw new Error('This event will be processed in the future');
-        } else if (wantedEventId === eventId) {
+        } else if (expectedEventId === eventId) {
             // this is the event we are looking for!
 
             console.log(`Processing an event with type ${type}`);
@@ -85,7 +89,7 @@ export const handler: SQSHandler = async (event) => {
         } else {
             // no need for processing as we have already processed this one
             // a.k.a. batch processing protection
-            console.log(`Past event ${eventId}, wanted ${wantedEventId}. Skipping.`);
+            console.log(`Past event ${eventId}, expected ${expectedEventId}. Skipping.`);
             continue;
         }
     }

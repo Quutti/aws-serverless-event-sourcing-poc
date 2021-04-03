@@ -1,6 +1,6 @@
 import * as AWSRaw from 'aws-sdk';
 import * as XRay from 'aws-xray-sdk-core';
-
+import { v4 as uuid } from 'uuid';
 import { DynamoDBStreamHandler } from "aws-lambda";
 
 const AWS = XRay.captureAWS(AWSRaw);
@@ -25,7 +25,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             }
         });
 
-        const { streamId } = event;
+        const { streamId, eventId } = event;
 
         await sns.publish({
             TopicArn: topicArn,
@@ -35,7 +35,9 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                     DataType: 'String',
                     StringValue: streamId
                 }
-            }
+            },
+            MessageDeduplicationId: `${streamId}-${eventId}-EventStore`,
+            MessageGroupId: `${streamId}-EventStore`
         }).promise();
     }
 }

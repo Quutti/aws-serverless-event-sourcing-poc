@@ -1,17 +1,19 @@
 import { AttributeType, Table } from "@aws-cdk/aws-dynamodb";
-import { Function } from "@aws-cdk/aws-lambda";
-import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { Queue } from "@aws-cdk/aws-sqs";
 import { Construct, Duration } from "@aws-cdk/core";
 import EventStore from "../event-store";
+import Replay from "../replay";
 
 export type BaseProjectorProps = {
     eventStore: EventStore;
+    replay?: Replay;
     streamIds: string[];
     tracingEnabled?: boolean;
 }
 
 export default abstract class BaseProjector extends Construct {
+
+    public queueUrl: string;
 
     protected projectionTable: Table;
     protected projectionQueue: Queue;
@@ -30,10 +32,17 @@ export default abstract class BaseProjector extends Construct {
         });
 
         this.projectionQueue = new Queue(this, 'ProjectionQueue', {
-            retentionPeriod: Duration.days(14)
+            retentionPeriod: Duration.days(14),
+            fifo: true
         });
 
+        this.queueUrl = this.projectionQueue.queueUrl;
+
         props.eventStore.subscribeQueueToTopic(this.projectionQueue, props.streamIds);
+
+        if (props.replay) {
+            this.projectionQueue.grantSendMessages(props.replay);
+        }
     }
 
 }

@@ -19,7 +19,9 @@ module.exports = () => {
         'eventStoreStreamHandler',
         'eventStoreFrontendQueueHandler',
         'testProjector',
-        'listTestItems'
+        'listTestItems',
+        'replay',
+        'triggerReplay'
     );
 
     config.output = {

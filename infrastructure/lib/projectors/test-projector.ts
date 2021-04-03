@@ -30,7 +30,8 @@ export default class TestProjector extends BaseProjector {
                 PROJECTION_STATE_TABLE_NAME: this.projectionTable.tableName,
                 READ_MODEL_TABLE_NAME: this.readModelTable.tableName
             },
-            timeout: Duration.seconds(30),
+            memorySize: 256,
+            timeout: Duration.seconds(15),
             tracing: (this.tracingRequested) ? Tracing.ACTIVE : Tracing.DISABLED
         });
 
