@@ -1,7 +1,7 @@
 # AWS Serverless Event Sourcing POC
 A proof-of-concept for building a event sourcing stuff on top of AWS Serverless platform.
 
-Application consists of a simple API Gateway with two endpoints. One for adding events into event store and one for listing the items from the aggregated read model. 
+Application consists of a simple API Gateway with three endpoints. One for adding events into event store , one for listing the items from the aggregated read model and one for triggering the replay functionality. 
 
 Built with AWS-CDK and Node.js.
 
@@ -14,13 +14,12 @@ This project is meant for proofing the concept. Use by your own risk. :)
 ## Usage
 
 ### Deployment
-1) Run `npm install` on both "subprojects" - infrastructure and services.
-2) Create an .env file into infrastructure "project"
+1) Run `npm install` on app directory
+2) Create an .env file (See section "Environment variables" below)
 3) Define env vars listed below
 4) Run `npm run deploy`
 
 ### Environment variables
-Protip: Environment variables can be defined into .env file. 
 ```
 API_KEY - Required API Key which must be spesified on the request targeting the API Gateway endpoints
 TRACING - Optional boolean (true/false) for enabling the AWS X-Ray tracing
