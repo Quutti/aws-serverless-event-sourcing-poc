@@ -1,17 +1,17 @@
-import { AttributeType, Table } from "@aws-cdk/aws-dynamodb";
+import { AttributeType, BillingMode, Table } from "@aws-cdk/aws-dynamodb";
 import { Queue } from "@aws-cdk/aws-sqs";
-import { Construct, Duration } from "@aws-cdk/core";
+import { Construct, Duration, RemovalPolicy } from "@aws-cdk/core";
 import EventStore from "../event-store";
 import Replay from "../replay";
 
-export type BaseProjectorProps = {
+export type BaseProjectionProps = {
     eventStore: EventStore;
     replay?: Replay;
     streamIds: string[];
     tracingEnabled?: boolean;
 }
 
-export default abstract class BaseProjector extends Construct {
+export default abstract class BaseProjection extends Construct {
 
     public queueUrl: string;
 
@@ -19,7 +19,7 @@ export default abstract class BaseProjector extends Construct {
     protected projectionQueue: Queue;
     protected tracingRequested: boolean;
 
-    constructor(scope: Construct, id: string, props: BaseProjectorProps) {
+    constructor(scope: Construct, id: string, props: BaseProjectionProps) {
         super(scope, id);
 
         this.tracingRequested = !!props.tracingEnabled;
@@ -28,7 +28,9 @@ export default abstract class BaseProjector extends Construct {
             partitionKey: {
                 name: 'pkey',
                 type: AttributeType.STRING
-            }
+            },
+            billingMode: BillingMode.PAY_PER_REQUEST,
+            removalPolicy: RemovalPolicy.DESTROY
         });
 
         this.projectionQueue = new Queue(this, 'ProjectionQueue', {

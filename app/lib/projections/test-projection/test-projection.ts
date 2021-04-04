@@ -1,14 +1,14 @@
 import { AttributeType, BillingMode, ITable, Table } from "@aws-cdk/aws-dynamodb";
-import { Function, Runtime, Tracing } from "@aws-cdk/aws-lambda";
+import { Runtime, Tracing } from "@aws-cdk/aws-lambda";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
-import { Construct, Duration } from "@aws-cdk/core";
+import { Construct, Duration, RemovalPolicy } from "@aws-cdk/core";
 import { join } from "path";
 import TSFunction from "../../ts-function";
-import BaseProjector, { BaseProjectorProps } from "../base-projector";
+import BaseProjection, { BaseProjectionProps } from "../base-projection";
 
-export type TestProjectorProps = BaseProjectorProps;
+export type TestProjectorProps = BaseProjectionProps;
 
-export default class TestProjector extends BaseProjector {
+export default class TestProjection extends BaseProjection {
 
     public readModelTable: ITable;
 
@@ -20,10 +20,11 @@ export default class TestProjector extends BaseProjector {
             partitionKey: {
                 name: 'pkey',
                 type: AttributeType.STRING
-            }
+            },
+            removalPolicy: RemovalPolicy.DESTROY
         });
 
-        const func = new TSFunction(this, 'ProjectorFunction', {
+        const func = new TSFunction(this, 'Function', {
             entry: join(__dirname, 'src', 'handler.ts'),
             runtime: Runtime.NODEJS_14_X,
             environment: {

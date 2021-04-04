@@ -1,8 +1,8 @@
 import * as cdk from '@aws-cdk/core';
-import { ApiKey, EndpointType, LambdaIntegration, RestApi, UsagePlan } from '@aws-cdk/aws-apigateway';
+import { ApiKey, EndpointType, LambdaIntegration, RestApi } from '@aws-cdk/aws-apigateway';
 import { Runtime, Tracing } from '@aws-cdk/aws-lambda';
 import EventStore from './event-store/event-store';
-import TestProjector from './projectors/test-projector/test-projector';
+import TestProjection from './projections/test-projection/test-projection';
 import Replay from './replay/replay';
 import { join } from 'path';
 import TSFunction from './ts-function';
@@ -64,7 +64,7 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
             eventStore
         });
 
-        const testProjector = new TestProjector(this, 'TestProjector', {
+        const testProjector = new TestProjection(this, 'TestProjection', {
             eventStore,
             streamIds: ['eb724435-02cb-4c68-9d7a-4b6471c5a810'],
             tracingEnabled,
