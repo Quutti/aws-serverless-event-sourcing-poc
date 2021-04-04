@@ -1,10 +1,11 @@
 import * as cdk from '@aws-cdk/core';
 import { ApiKey, EndpointType, LambdaIntegration, RestApi, UsagePlan } from '@aws-cdk/aws-apigateway';
-import { Function, Runtime, Tracing } from '@aws-cdk/aws-lambda';
-import EventStore from './event-store';
-import { codeDirectory } from './code';
-import TestProjector from './projectors/test-projector';
-import Replay from './replay';
+import { Runtime, Tracing } from '@aws-cdk/aws-lambda';
+import EventStore from './event-store/event-store';
+import TestProjector from './projectors/test-projector/test-projector';
+import Replay from './replay/replay';
+import { join } from 'path';
+import TSFunction from './ts-function';
 
 export type AwsServerlessEventSourcingPocStackProps = cdk.StackProps & {
     apiKey: string;
@@ -23,9 +24,8 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
             tracingEnabled
         });
 
-        const addEventFunction = new Function(this, 'AddEvent', {
-            code: codeDirectory,
-            handler: 'addEvent.handler',
+        const addEventFunction = new TSFunction(this, 'AddEvent', {
+            entry: join(__dirname, 'services', 'addEvent.ts'),
             runtime: Runtime.NODEJS_14_X,
             memorySize: 512,
             tracing: (props?.tracing) ? Tracing.ACTIVE : Tracing.DISABLED
@@ -55,18 +55,14 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
             }]
         });
 
-
-
         const addEventResource = api.root.addResource('addEvent');
         addEventResource.addMethod('POST', new LambdaIntegration(addEventFunction), {
             apiKeyRequired: true
         });
 
-
         const replay = new Replay(this, 'Replay', {
             eventStore
         });
-
 
         const testProjector = new TestProjector(this, 'TestProjector', {
             eventStore,
@@ -75,9 +71,8 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
             replay
         });
 
-        const triggerReplayFunction = new Function(this, 'TriggerReplay', {
-            code: codeDirectory,
-            handler: 'triggerReplay.handler',
+        const triggerReplayFunction = new TSFunction(this, 'TriggerReplay', {
+            entry: join(__dirname, 'services', 'triggerReplay.ts'),
             runtime: Runtime.NODEJS_14_X,
             memorySize: 512,
             tracing: (props?.tracing) ? Tracing.ACTIVE : Tracing.DISABLED,
@@ -93,9 +88,8 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
             apiKeyRequired: true
         });
 
-        const listTestItemsFunction = new Function(this, 'ListTestItems', {
-            code: codeDirectory,
-            handler: 'listTestItems.handler',
+        const listTestItemsFunction = new TSFunction(this, 'ListTestItems', {
+            entry: join(__dirname, 'services', 'listTestItems.ts'),
             runtime: Runtime.NODEJS_14_X,
             memorySize: 512,
             environment: {
@@ -105,8 +99,6 @@ export class AwsServerlessEventSourcingPocStack extends cdk.Stack {
         });
 
         testProjector.readModelTable.grant(listTestItemsFunction, 'dynamodb:Scan');
-
-
 
         const listTestItemsResource = api.root.addResource('listTestItems');
         listTestItemsResource.addMethod('GET', new LambdaIntegration(listTestItemsFunction), {

@@ -1,13 +1,13 @@
 import { AttributeType, BillingMode, StreamViewType, Table } from "@aws-cdk/aws-dynamodb";
 import { IGrantable } from "@aws-cdk/aws-iam";
-import { Code, Function, IFunction, Runtime, StartingPosition, Tracing } from "@aws-cdk/aws-lambda";
+import { Function, Runtime, StartingPosition, Tracing } from "@aws-cdk/aws-lambda";
 import { SubscriptionFilter, Topic } from "@aws-cdk/aws-sns";
 import { Construct, Duration, Stack } from "@aws-cdk/core";
 import { join } from "path";
 import { DynamoEventSource, SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { SqsSubscription } from "@aws-cdk/aws-sns-subscriptions";
 import { IQueue, Queue } from "@aws-cdk/aws-sqs";
-import { codeDirectory } from "./code";
+import TSFunction from "../ts-function";
 
 export type EventStoreProps = {
     tracingEnabled?: boolean;
@@ -65,9 +65,8 @@ export default class EventStore extends Construct {
 
         const tracing = (props?.tracingEnabled) ? Tracing.ACTIVE : Tracing.DISABLED;
 
-        const queueProcessingFunction = new Function(this, 'QueueHandler', {
-            code: codeDirectory,
-            handler: 'eventStoreFrontendQueueHandler.handler',
+        const queueProcessingFunction = new TSFunction(this, 'QueueHandler', {
+            entry: join(__dirname, 'src', 'queue-processor-handler.ts'),
             runtime: Runtime.NODEJS_14_X,
             environment: {
                 EVENT_STORE_TABLE_NAME: this.eventStoreTable.tableName
@@ -78,9 +77,8 @@ export default class EventStore extends Construct {
         queueProcessingFunction.addEventSource(eventStoreFrontendQueueSource);
         this.eventStoreTable.grant(queueProcessingFunction, 'dynamodb:PutItem', 'dynamodb:Query');
 
-        const streamHandlingFunction = new Function(this, 'StreamHandler', {
-            code: codeDirectory,
-            handler: 'eventStoreStreamHandler.handler',
+        const streamHandlingFunction = new TSFunction(this, 'StreamHandler', {
+            entry: join(__dirname, 'src', 'stream-processor-handler.ts'),
             runtime: Runtime.NODEJS_14_X,
             environment: {
                 TOPIC_ARN: this.eventStoreTopic.topicArn

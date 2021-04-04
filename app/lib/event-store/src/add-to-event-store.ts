@@ -8,7 +8,7 @@ const dynamoDbClient = new AWS.DynamoDB.DocumentClient();
 const ADD_EVENT_LOG_CONTEXT = 'AddEventToEventStore';
 
 export const addToEventStore = async (streamId: string, type: string, data: { [key: string]: any }) => {
-    const tableName = process.env.EVENT_STORE_TABLE_NAME;
+    const tableName = process.env.EVENT_STORE_TABLE_NAME as string;
 
     if (!tableName) {
         throw new Error('No EVENT_STORE_TABLE_NAME environment variable defined!');
@@ -31,7 +31,7 @@ export const addToEventStore = async (streamId: string, type: string, data: { [k
                 ScanIndexForward: false
             }).promise();
 
-            const lastItem = queryResult.Items[0] || null;
+            const lastItem = (queryResult.Items || [])[0] || null;
             const nextEventId = lastItem ? lastItem.eventId + 1 : 0;
             const timeStamp = new Date().toJSON();
 

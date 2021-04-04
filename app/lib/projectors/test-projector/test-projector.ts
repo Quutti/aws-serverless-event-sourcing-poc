@@ -2,8 +2,9 @@ import { AttributeType, BillingMode, ITable, Table } from "@aws-cdk/aws-dynamodb
 import { Function, Runtime, Tracing } from "@aws-cdk/aws-lambda";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { Construct, Duration } from "@aws-cdk/core";
-import { codeDirectory } from "../code";
-import BaseProjector, { BaseProjectorProps } from "./base-projector";
+import { join } from "path";
+import TSFunction from "../../ts-function";
+import BaseProjector, { BaseProjectorProps } from "../base-projector";
 
 export type TestProjectorProps = BaseProjectorProps;
 
@@ -22,9 +23,8 @@ export default class TestProjector extends BaseProjector {
             }
         });
 
-        const func = new Function(this, 'ProjectorFunction', {
-            code: codeDirectory,
-            handler: 'testProjector.handler',
+        const func = new TSFunction(this, 'ProjectorFunction', {
+            entry: join(__dirname, 'src', 'handler.ts'),
             runtime: Runtime.NODEJS_14_X,
             environment: {
                 PROJECTION_STATE_TABLE_NAME: this.projectionTable.tableName,

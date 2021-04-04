@@ -1,0 +1,38 @@
+{
+  "name": "aws-serverless-event-sourcing-poc",
+  "version": "0.1.0",
+  "bin": {
+    "aws-serverless-event-sourcing-poc": "bin/aws-serverless-event-sourcing-poc.js"
+  },
+  "scripts": {
+    "cdk": "cdk",
+    "deploy": "./node_modules/.bin/cdk deploy",
+    "diff": "./node_modules/.bin/cdk diff"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "1.94.1",
+    "@types/aws-lambda": "^8.10.73",
+    "@types/node": "10.17.27",
+    "@types/uuid": "^8.3.0",
+    "aws-cdk": "1.94.1",
+    "ts-node": "^9.0.0",
+    "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-apigateway": "1.94.1",
+    "@aws-cdk/aws-dynamodb": "1.94.1",
+    "@aws-cdk/aws-iam": "1.94.1",
+    "@aws-cdk/aws-lambda": "1.94.1",
+    "@aws-cdk/aws-lambda-event-sources": "1.94.1",
+    "@aws-cdk/aws-lambda-nodejs": "1.94.1",
+    "@aws-cdk/aws-sns": "1.94.1",
+    "@aws-cdk/aws-sns-subscriptions": "1.94.1",
+    "@aws-cdk/aws-sqs": "1.94.1",
+    "@aws-cdk/core": "1.94.1",
+    "aws-sdk": "^2.879.0",
+    "aws-xray-sdk-core": "^3.2.0",
+    "dotenv": "^8.2.0",
+    "source-map-support": "^0.5.16",
+    "uuid": "^8.3.2"
+  }
+}

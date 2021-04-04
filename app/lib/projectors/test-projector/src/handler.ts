@@ -6,8 +6,8 @@ const AWS = XRay.captureAWS(AWSRaw);
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
-const resolveLastProcessedEventId = async (streamId) => {
-    const projectionStateTableName = process.env.PROJECTION_STATE_TABLE_NAME;
+const resolveLastProcessedEventId = async (streamId: string) => {
+    const projectionStateTableName = process.env.PROJECTION_STATE_TABLE_NAME as string;
 
     const { Item: item } = await documentClient.get({
         TableName: projectionStateTableName,
@@ -21,8 +21,8 @@ const resolveLastProcessedEventId = async (streamId) => {
 }
 
 export const handler: SQSHandler = async (event) => {
-    const readModelTableName = process.env.READ_MODEL_TABLE_NAME;
-    const projectionStateTableName = process.env.PROJECTION_STATE_TABLE_NAME;
+    const readModelTableName = process.env.READ_MODEL_TABLE_NAME as string;
+    const projectionStateTableName = process.env.PROJECTION_STATE_TABLE_NAME as string;
 
     for (const record of event.Records) {
         const eventContext = JSON.parse(record.body);

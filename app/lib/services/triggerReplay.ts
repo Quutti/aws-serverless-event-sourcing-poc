@@ -7,7 +7,7 @@ const sqs = new AWS.SQS();
 export const handler: APIGatewayProxyHandler = async (event) => {
     let body;
     try {
-        body = JSON.parse(event.body);
+        body = JSON.parse(event.body as string);
     } catch (e) {
         return { body: '', statusCode: 400 }
     }
@@ -24,14 +24,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const messageUniqueId = uuid();
 
     await sqs.sendMessage({
-        QueueUrl: process.env.REPLAY_REQUEST_QUEUE_URL,
+        QueueUrl: process.env.REPLAY_REQUEST_QUEUE_URL as string,
         MessageBody: JSON.stringify({
             replay: {
                 streamId,
                 fromEventId,
                 target: {
                     sqs: {
-                        queueUrl: process.env.TEST_PROJECTOR_QUEUE_URL
+                        queueUrl: process.env.TEST_PROJECTOR_QUEUE_URL as string
                     }
                 }
             }

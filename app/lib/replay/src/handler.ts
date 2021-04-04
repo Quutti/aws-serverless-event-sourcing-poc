@@ -53,10 +53,11 @@ export const handler: SQSHandler = async (event) => {
     console.log(`Stream ${streamId} position ${fromEventId}`);
     console.log(`Target: ${sqsTargetUrl}`);
 
-    let lastEvaluatedKey: AWS.DynamoDB.DocumentClient.Key = null;
-    while (lastEvaluatedKey !== undefined) {
+    let firstRun: boolean = true;
+    let lastEvaluatedKey: AWS.DynamoDB.DocumentClient.Key | undefined;
+    while (firstRun || !!lastEvaluatedKey) {
         const result = await documentClient.query({
-            TableName: process.env.EVENT_STORE_TABLE_NAME,
+            TableName: process.env.EVENT_STORE_TABLE_NAME as string,
             KeyConditionExpression: 'pkey = :p and skey >= :s',
             ExpressionAttributeValues: {
                 ':p': streamId,
@@ -70,6 +71,8 @@ export const handler: SQSHandler = async (event) => {
         }
 
         lastEvaluatedKey = result.LastEvaluatedKey;
+
+        firstRun = false;
     }
 
     while (events.length > 0) {

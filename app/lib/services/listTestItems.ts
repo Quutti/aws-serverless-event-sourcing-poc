@@ -8,7 +8,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 export const handler: APIGatewayProxyHandler = async (event) => {
 
     const { Items: items } = await documentClient.scan({
-        TableName: process.env.READ_MODEL_TABLE_NAME
+        TableName: process.env.READ_MODEL_TABLE_NAME as string
     }).promise();
 
     const fixedItems = (items || []).map(item => ({

@@ -1,11 +1,11 @@
-import { AuthorizationType, EndpointType, LambdaIntegration, RestApi } from "@aws-cdk/aws-apigateway";
 import { Effect, IGrantable, IPrincipal, PolicyStatement } from "@aws-cdk/aws-iam";
 import { Function, Runtime } from "@aws-cdk/aws-lambda";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { Queue } from "@aws-cdk/aws-sqs";
 import { Construct, Duration } from "@aws-cdk/core";
-import { codeDirectory } from "./code";
-import EventStore from "./event-store";
+import { join } from "path";
+import EventStore from "../event-store/event-store";
+import TSFunction from "../ts-function";
 
 export type ReplayProps = {
     eventStore: EventStore
@@ -34,9 +34,8 @@ export default class Replay extends Construct implements IGrantable {
 
         this.requestReplayQueueUrl = replayRequestQueue.queueUrl;
 
-        this.replayFunction = new Function(this, 'ProcessingFunction', {
-            code: codeDirectory,
-            handler: 'replay.handler',
+        this.replayFunction = new TSFunction(this, 'ProcessingFunction', {
+            entry: join(__dirname, 'src', 'handler.ts'),
             runtime: Runtime.NODEJS_14_X,
             timeout: visibilityTimeout,
             memorySize: 2048,
